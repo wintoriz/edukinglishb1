@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edukinglish - Nivel B1 (Diego)</title>
+  <title>Edukinglish - Level B1 (Kingly)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -21,9 +21,9 @@
 <div id="view-access" class="min-h-screen flex items-center justify-center p-4">
   <div class="w-full max-w-md">
     <div class="text-center mb-6 bounce-in">
-      <div class="text-7xl mb-2 float-slow">🦅</div>
+      <div class="text-7xl mb-2 float-slow">🦁</div>
       <h1 class="text-4xl font-bold text-cyan-300 font-heading">Edukinglish</h1>
-      <p class="text-cyan-200 mt-1">Level B1 · Intermediate Challenges with Diego!</p>
+      <p class="text-cyan-200 mt-1">Level B1 · Intermediate Challenges with Kingly!</p>
     </div>
 
     <div class="bg-slate-800/90 border border-cyan-500/30 rounded-3xl shadow-2xl p-8 backdrop-blur-md">
@@ -34,7 +34,7 @@
         class="w-full p-3 rounded-xl bg-slate-900 border-2 border-cyan-500/30 text-white mb-4 font-bold focus:border-cyan-400 focus:outline-none">
       
       <label class="block text-sm font-bold text-cyan-300 mb-1">Student Access Code</label>
-      <input id="inp-code" type="text" maxlength="25" placeholder="e.g. B1-001 or DIEGO-B1"
+      <input id="inp-code" type="text" maxlength="25" placeholder="e.g. EDUKINGLISH-1111 or B1-ALUMNO"
         class="w-full p-3 rounded-xl bg-slate-900 border-2 border-cyan-500/30 text-white mb-2 font-bold focus:border-cyan-400 focus:outline-none uppercase">
       
       <p class="text-xs text-cyan-400 mb-4">Enter your access code provided by your teacher.</p>
@@ -54,7 +54,7 @@
   <!-- Sidebar -->
   <aside class="w-full md:w-64 bg-cyan-950/80 border-r border-cyan-500/30 text-white p-5 flex-shrink-0 backdrop-blur-md">
     <div class="flex items-center gap-3 mb-5">
-      <a href="https://wintoriz.github.io/edukinglishmenu/" class="w-10 h-10 bg-cyan-600/40 border border-cyan-400/30 rounded-xl flex items-center justify-center text-2xl hover:bg-cyan-600 transition" title="Main Menu">🦅</a>
+      <a href="https://wintoriz.github.io/edukinglishmenu/" class="w-10 h-10 bg-cyan-600/40 border border-cyan-400/30 rounded-xl flex items-center justify-center text-2xl hover:bg-cyan-600 transition" title="Main Menu">🦁</a>
       <div>
         <span class="font-heading text-xl tracking-wide text-cyan-300 block leading-none">Edukinglish</span>
         <span class="text-[11px] text-cyan-200">Level B1 · Intermediate</span>
@@ -62,7 +62,7 @@
     </div>
 
     <div class="bg-cyan-900/40 border border-cyan-500/30 rounded-xl p-3 mb-4 text-sm">
-      <div class="flex items-center gap-2 font-bold"><span class="text-lg">🎯</span><span id="sb-name">...</span></div>
+      <div class="flex items-center gap-2 font-bold"><span class="text-lg">🦁</span><span id="sb-name">...</span></div>
       <div class="flex justify-between mt-2 text-cyan-200 text-xs font-bold">
         <span>🔥 Streak: <span id="sb-streak" class="text-amber-400">0</span></span>
         <span>⭐ <span id="sb-pts" class="text-amber-400">0</span> pts</span>
@@ -80,7 +80,7 @@
     <header class="bg-slate-800/80 border border-cyan-500/30 p-6 rounded-3xl shadow-lg mb-6 backdrop-blur-md">
       <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <span class="text-xs font-bold text-cyan-300 bg-cyan-500/20 px-3 py-1 rounded-full uppercase tracking-wider">Diego's Challenges</span>
+          <span class="text-xs font-bold text-cyan-300 bg-cyan-500/20 px-3 py-1 rounded-full uppercase tracking-wider">Kingly's B1 Quests</span>
           <h1 id="module-title" class="text-2xl md:text-3xl font-bold text-white font-heading mt-2">Module 1</h1>
           <p id="module-subtitle" class="text-cyan-200 font-semibold text-sm mt-1"></p>
         </div>
@@ -132,7 +132,7 @@ const moduleTitles = {
   "7": "Relative Clauses (Who, Which, That, Where)", "8": "Third Conditional & Past Regrets", "9": "Gerunds & Infinitives", "10": "Advanced Review & Final Challenge"
 };
 
-const ACCESS_CODES_FALLBACK = ["DIEGO-B1", "EDUKINGLISH-ADMIN", "B1-001"];
+const ACCESS_CODES_FALLBACK = ["EDUKINGLISH-1111", "EDUKINGLISH-ADMIN", "B1-001", "B1-ALUMNO"];
 const STORAGE_KEY = 'edk_profiles_b1_v1';
 
 let exercisesData = {};
@@ -176,14 +176,15 @@ async function loadDataFromSheets() {
       let data = {};
       
       rows.forEach(row => {
-        if (row.length > 5 && row[0] === 'B1' && row[5] && row[5] !== 'Instruction / Question') {
-          const m = String(parseInt((row[1] || '').replace('Module', '').replace('Módulo', '').trim()) || 1);
-          const d = String(parseInt(row[2]) || 1);
-          const type = row[4] ? row[4].trim() : 'Multiple Choice';
-          const q = row[5] ? row[5].trim() : '';
-          const rawOpts = row[6] ? row[6].split('|').map(s => s.trim()) : [];
-          const ans = row[7] ? row[7].trim() : '';
-          const fb = row[8] ? row[8].trim() : '';
+        // Validación adaptada para capturar correctamente la fila según la estructura de B1
+        if (row.length >= 9 && row[1] && row[1].toUpperCase() === 'B1') {
+          const m = String(parseInt((row[2] || '').replace(/[^0-9]/g, '')) || 1);
+          const d = String(parseInt(row[3]) || 1);
+          const type = row[5] ? row[5].trim() : 'Multiple Choice';
+          const q = row[6] ? row[6].trim() : '';
+          const rawOpts = row[7] ? row[7].split('|').map(s => s.trim()) : [];
+          const ans = row[8] ? row[8].trim() : '';
+          const fb = row[9] ? row[9].trim() : '';
 
           if (!data[m]) data[m] = {};
           if (!data[m][d]) data[m][d] = [];
@@ -220,7 +221,7 @@ function login() {
 
   if (!name) { err.textContent = '❌ Please enter your name to begin.'; err.classList.remove('hidden'); return; }
 
-  const isValidLocal = ACCESS_CODES_FALLBACK.includes(code) || code.startsWith("EDU-") || code.startsWith("B1-");
+  const isValidLocal = ACCESS_CODES_FALLBACK.includes(code) || code.startsWith("EDU") || code.startsWith("B1");
 
   if (!isValidLocal) {
     err.textContent = '❌ Invalid code. Check your access code and try again.'; 
@@ -290,7 +291,7 @@ function renderNav() {
       locked ? 'bg-slate-900/40 text-slate-500 cursor-not-allowed' :
       'hover:bg-cyan-900/50 text-slate-200'}`;
     btn.innerHTML = `<span class="flex items-center gap-2">
-        <span>${locked ? '🔒' : done ? '🏆' : '🦅'}</span><span>Module ${i}</span>
+        <span>${locked ? '🔒' : done ? '🏆' : '🦁'}</span><span>Module ${i}</span>
       </span>
       <span class="text-[10px] font-extrabold ${done ? 'text-amber-400' : 'text-cyan-300'}">${done ? '★'.repeat(stars) : '15 ex.'}</span>`;
     if (!locked) btn.onclick = () => selectModule(i);
@@ -418,6 +419,9 @@ function renderExercise() {
   isSolved = isExSolved(currentModule, currentDay, currentExIndex);
   selectedWords = [];
 
+  const isUnscramble = ex.type.toLowerCase().includes('unscramble');
+  const isListening = ex.type.toLowerCase().includes('listening');
+
   let html = `<div class="mb-4 flex items-center justify-between">
       <span class="text-xs font-bold uppercase tracking-wider text-cyan-300 bg-cyan-500/20 px-3 py-1 rounded-md border border-cyan-400/30">${ex.type}</span>
       <span class="text-xs font-bold text-slate-400">Exercise ${currentExIndex + 1} of 5</span>
@@ -425,7 +429,7 @@ function renderExercise() {
 
   html += `<h3 class="text-xl font-bold text-white mb-6 leading-relaxed">${esc(ex.q)}</h3>`;
 
-  if (ex.type === 'Listening') {
+  if (isListening) {
     html += `<div class="mb-6 p-6 bg-cyan-950/40 border border-cyan-500/30 rounded-2xl flex flex-col items-center justify-center">
         <button onclick="playCurrentAnswer()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold px-8 py-4 rounded-2xl flex items-center gap-3 shadow-lg transition-all transform hover:scale-105 active:scale-95 border border-cyan-400/40">
           <span class="text-2xl animate-pulse">🔊</span> Listen to Full Sentence
@@ -434,7 +438,7 @@ function renderExercise() {
       </div>`;
   }
 
-  if (ex.words && ex.type === 'Sentence Unscramble') {
+  if (isUnscramble) {
     html += `<p class="text-sm font-bold text-cyan-300 mb-2">Tap words in order 👇</p>
       <div id="scramble-box" class="min-h-[60px] p-4 bg-slate-900/60 border-2 border-dashed border-cyan-500/30 rounded-2xl mb-4 flex flex-wrap gap-2 items-center"></div>
       <div id="words-row" class="flex flex-wrap gap-2 mb-6">`;
