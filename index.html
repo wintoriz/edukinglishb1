@@ -141,12 +141,13 @@ const STORAGE_KEY = 'edk_profiles_b1_v1';
 
 let exercisesData = {};
 let remoteStudents = [];
+let sheetsLoadedPromise = null;
 
 let currentModule = 1, currentDay = 1, currentExIndex = 0;
 let isSolved = false, selectedWords = [];
 let profile = null;
 
-function parseCSV(text) {
+function parseCSVExact(text) {
   const lines = text.split('\n');
   const result = [];
   for (let i = 0; i < lines.length; i++) {
@@ -178,7 +179,7 @@ async function loadDataFromSheets() {
     const res = await fetch(EXERCISES_SHEET_URL);
     if (res.ok) {
       const csv = await res.text();
-      const rows = parseCSV(csv);
+      const rows = parseCSVExact(csv);
       let data = {};
       rows.forEach(row => {
         if (row.length >= 9 && row[1] && row[1].toUpperCase() === 'B1') {
@@ -200,20 +201,30 @@ async function loadDataFromSheets() {
     }
   } catch(e) { console.warn("Error reading B1 Sheets spreadsheet."); }
 
+  if (profile) updateUI();
+}
+
+async function loadStudentsList() {
   try {
     const res = await fetch(STUDENTS_SHEET_URL);
     if (res.ok) {
       const csv = await res.text();
-      const rows = parseCSV(csv);
+      const rows = parseCSVExact(csv);
+      const validCodes = [];
       rows.forEach(row => {
-        if (row[0] && row[0].trim().toUpperCase() !== 'CÓDIGO') {
-          remoteStudents.push(row[0].trim().toUpperCase());
+        const idAlumno = (row[0] || '').trim().toUpperCase();
+        const estatus = (row[9] || '').trim().toLowerCase();
+        if (idAlumno && idAlumno !== 'ID ALUMNO' && idAlumno !== 'CÓDIGO' && !idAlumno.includes('EDUKINGLISH - CONTROL')) {
+          if (estatus === 'activo' || estatus === '') {
+            validCodes.push(idAlumno);
+          }
         }
       });
+      remoteStudents = validCodes;
     }
-  } catch(e) { console.warn("Error reading student access codes sheet."); }
-
-  if (profile) updateUI();
+  } catch (e) {
+    console.warn("Error reading student access codes sheet:", e);
+  }
 }
 
 function loadProfiles() {
@@ -227,21 +238,32 @@ function saveProfiles() {
 }
 function todayStr() { return new Date().toISOString().slice(0,10); }
 
-function login() {
+async function login() {
   const name = document.getElementById('inp-name').value.trim();
   const code = document.getElementById('inp-code').value.trim().toUpperCase();
   const err = document.getElementById('access-error');
   err.classList.add('hidden');
 
-  if (!name) { err.textContent = '❌ Please enter your name to begin.'; err.classList.remove('hidden'); return; }
+  if (!name) {
+    err.textContent = '❌ Please enter your name to begin.';
+    err.classList.remove('hidden');
+    return;
+  }
+
+  if (sheetsLoadedPromise) {
+    err.textContent = '⏳ Verifying access code...';
+    err.classList.remove('hidden');
+    await sheetsLoadedPromise;
+    err.classList.add('hidden');
+  }
 
   const isValidRemote = remoteStudents.includes(code);
   const isValidLocal = ACCESS_CODES_FALLBACK.includes(code);
 
   if (!isValidRemote && !isValidLocal) {
-    err.textContent = '❌ Invalid code. Check your access code and try again.'; 
-    err.classList.remove('hidden'); 
-    return; 
+    err.textContent = '❌ Invalid code or inactive subscription. Check with your teacher.';
+    err.classList.remove('hidden');
+    return;
   }
 
   const all = loadProfiles();
@@ -570,7 +592,7 @@ function nextExercise() {
 document.getElementById('inp-code').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 document.getElementById('inp-name').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 
-loadDataFromSheets();
+sheetsLoadedPromise = Promise.all([loadDataFromSheets(), loadStudentsList()]);
 </script>
 </body>
 </html>
